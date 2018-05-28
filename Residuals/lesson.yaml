@@ -1,0 +1,175 @@
+- Class: meta
+  Course: Regression_Models
+  Lesson: Residuals
+  Author: mzl
+  Type: Standard
+  Organization: pkuss
+  Version: 2.2.0
+
+- Class: text
+  Output: 这一课将集中于残差(Residuals)--实际儿童高度与回归线给出的估计值之间的距离。由于所有线的特征是两个参数，
+    一个斜率(slope)和一个截距(intercept)，我们将使用最小二乘(least squares)准则来提供两个未知数的两个方程，这样我们就可以解决这些参数，
+    斜率和截距。 
+
+- Class: text
+  Output: 第一个方程说，我们的估计中的“误差”("errors")，即残差，均值等于零。换句话说，残差在数据点之间是“平衡的”，它们可能是正也可可能是负的。
+    第二个方程说，我们的残差必须与预测因子父母的身高不相关。这是有道理的-如果残差和预测因子是相关的，那么你可以做一个更好的预测，
+    并减少实际结果和预测之间的距离（残差）。 
+
+- Class: cmd_question
+  Output: 现在我们将演示这些概念。首先求取回归线并称之为fit。使用r函数lm。回想一下，默认情况下，它的第一个参数是一个公式，
+    child ~ parent，第二个参数是数据集，在这种情况下，galton。 
+  CorrectAnswer: fit <- lm(child ~ parent, galton)
+  AnswerTests: creates_lm_model('fit <- lm(child ~ parent, galton)')
+  Hint: 在R提示符处输入fit <- lm(child ~ parent, galton)
+
+- Class: cmd_question
+  Output: 现在我们要检查fit，看看它的斜率和截距。我们感兴趣的残差存储在928长向量fit$residuals中。如果你输入fit$residuals，
+    你会看到很多滚动的数据，这不是很有用；但是，如果你输入summary(fit)，你会看到一个更简洁的回归数据显示。现在就这样做。 
+  CorrectAnswer: summary(fit)
+  AnswerTests: omnitest(correctExpr='summary(fit)')
+  Hint: 在R提示符处输入summary(fit)
+
+- Class: cmd_question
+  Output: 首先检查拟合残差(fit$residuals)的平均值，看看它是否接近0。 
+  CorrectAnswer: mean(fit$residuals)
+  AnswerTests: omnitest(correctExpr='mean(fit$residuals)')
+  Hint: 在r提示符处输入mean(fit$residuals)
+
+- Class: cmd_question
+  Output: 现在检查残差和预测因子之间的相关性。输入cov(fit$residuals,galton$parent)，看看它是否接近0。 
+  CorrectAnswer: cov(fit$residuals,galton$parent)
+  AnswerTests: ANY_of_exprs('cov(fit$residuals,galton$parent)','cov(galton$parent,fit$residuals)')
+  Hint: 在R提示符下cov(fit$residuals,galton$parent)。 
+
+- Class: text
+  Output: 我们已为你定义了两个R函数， est and sqe。这两个函数都需要两个输入，一个斜率和一个截距。
+    est计算孩子的身高（纵坐标）使用由两个参数（斜率和截距）定义的回归线，并在galton数据集里的父母身高为横坐标数据。 
+
+- Class: mult_question
+  Output: 让"mch"代表galton数据集孩子身高的平均值，"mph" 代表galton数据集父母身高的平均值。设"ic" 和 "slope" 分别代表回归线的截距和斜率。
+    点(mph,mch) 位于回归线上。这意味着 
+  AnswerChoices: mch = ic + slope*mph; mph = ic + slope*mch; I haven't the slightest idea.
+  CorrectAnswer: mch = ic + slope*mph
+  AnswerTests: omnitest(correctVal='mch = ic + slope*mph')
+  Hint: 一条线是所有点满足方程的（x，y）y = mx + b的集合，其中m是线的斜率，b是截距。记住，点(mph,mch) 位于截距为ic和斜率为slope的回归线上。
+
+- Class: text
+  Output: sqe计算残差平方和，残差是实际儿童的身高和估计的高度的差，估计的身高由给定的参数（斜率和截距）定义的直线计算得到。
+    R提供函数deviance去实现这个功能，用一个拟合的模型（例如，fit）作为参数。  
+
+- Class: text
+  Output: 我们将看到，当我们改变或调整存储在fit$coef中的回归线的斜率和截距值时，所得到的平方残差近似等于两个平方和的总和--
+    一个是原始回归残差平方和和调整导致的误差的平方和。
+
+- Class: text
+  Output: sqe(ols.slope+sl,ols.intercept+ic) == deviance(fit) + sum(est(sl,ic)^2 )
+
+- Class: text
+  Output: 同样，sqe(ols.slope+sl,ols.intercept+ic) == sqe(ols.slope, ols.intercept) + sum(est(sl,ic)^2 )
+
+- Class: text
+  Output: 等式的左边表示新线的残差平方，即“调整后的”回归线。 术语“sl”和“ic”分别表示斜率和截距的变化。 右边有两个词。 
+    第一个代表原始回归线的平方残差，第二个代表调整本身所产生的平方和。
+
+- Class: cmd_question
+  Output: 我们现在来证明一下。 首先从fit$coef中提取截距，并把它放在一个名为ols.ic的变量中。截距是fit$coef 向量中的第一个元素，即fit$coef[1]。
+  CorrectAnswer: ols.ic <- fit$coef[1]
+  AnswerTests: omnitest(correctExpr='ols.ic <- fit$coef[1]')
+  Hint: 在R提示符处输入“ols.ic <- fit$coef [1]”。
+
+- Class: cmd_question
+  Output: 现在从fit$coef中提取斜率并将其放入变量ols.slope; 斜率是fit$coef向量中的第二个元素，fit$coef [2]。
+  CorrectAnswer: ols.slope <- fit$coef[2]
+  AnswerTests: omnitest(correctExpr='ols.slope <- fit$coef[2]')
+  Hint: 在R提示符下输入“ols.slope <- fit$coef[2]。
+
+- Class: figure
+  Output: 现在我们将向您展示一些生成该方程左右两边的R代码。 花点时间看看。 我们已经形成了两个长6的变动的向量，一个是斜率，一个是截距。
+    然后我们有两个“for”循环来生成等式的两边。
+  Figure: demofile.R
+  FigureType: new
+
+- Class: cmd_question
+  Output: 左边的向量lhs减去右边的向量rhs，看它们之间的关系。 你应该得到一个非常小的，几乎为0的数字的向量。 
+  CorrectAnswer: lhs-rhs
+  AnswerTests: omnitest(correctExpr='lhs-rhs')
+  Hint: 在R提示符处输入“lhs-rhs”。
+
+- Class: cmd_question
+  Output: 你也可以使用R函数all.equal，lhs和rhs作为参数来测试是否相等。 现在就试试。
+  CorrectAnswer: all.equal(lhs,rhs)
+  AnswerTests: ANY_of_exprs('all.equal(lhs,rhs)','all.equal(rhs,lhs)')
+  Hint: 在R提示符下输入“all.equal（lhs，rhs）”。
+
+- Class: cmd_question
+  Output: 现在我们将看到儿童身高的方差是OLS估计的身高方差和OLS残差方差的总和。 首先使用R函数var来计算儿童身高的方差并将其存储在变量varChild中。
+  CorrectAnswer: varChild <- var(galton$child)
+  AnswerTests: omnitest(correctExpr='varChild <- var(galton$child)')
+  Hint: 在R提示符处输入“varChild <- var（galton $ child）”。
+  
+- Class: cmd_question
+  Output: 请记住，我们已经计算了残差，并将它们存储在fit$residuals中。 使用R函数var现在计算这些残差中的方差，并将其存储在变量varRes中
+  CorrectAnswer: varRes <- var(fit$residuals)
+  AnswerTests: omnitest(correctExpr='varRes <- var(fit$residuals)')
+  Hint: 在R提示符处输入“varRes <- var（fit $ residuals）”。
+
+- Class: cmd_question
+  Output: 回想一下，函数“est”计算沿着由变量“ols.slope”和“ols.ic”定义的回归线的值的估计值（y坐标）。 计算估计值的方差并将其存储在变量varEst中。
+  CorrectAnswer: varEst <- var(est(ols.slope, ols.ic))
+  AnswerTests: omnitest(correctExpr='varEst <- var(est(ols.slope, ols.ic))')
+  Hint: 在R提示符处输入varEst <- var（est（ols.slope，ols.ic）） 
+
+- Class: cmd_question
+  Output: 现在使用函数all.equal来比较varChild与varRes和varEst的总和。 
+  CorrectAnswer: all.equal(varChild,varEst+varRes)
+  AnswerTests: ANY_of_exprs('all.equal(varChild,varEst+varRes)','all.equal(varEst+varRes,varChild)','all.equal(varChild,varRes+varEst)','all.equal(varRes+varEst,varChild)')
+  Hint: 在R提示符处输入all.equal（varChild，varEst + varRes）。
+
+- Class: text
+  Output: 因为方差是平方和（因此总是正的），所以我们刚刚证明的这个方程（var（data）= var（estimate）+ var（residuals））表明估计的方差总是小于实际真实数据的方差。
+
+- Class: mult_question
+  Output: 由于var(data)=var(estimate)+var(residuals)和方差总是正数，残差的方差。 
+  AnswerChoices: is less than the variance of data; is greater than the variance of data; is unknown without actual data
+  CorrectAnswer: is less than variance of data
+  AnswerTests: omnitest(correctVal='is less than the variance of data')
+  Hint: 等式表示var（residuals）= var（data）-var（estimate）; 我们从var（data）中减去一个正数来给var（residuals）
+
+- Class: text
+  Output: 我们在这里强调的残差的两个属性可以应用于具有多个预测变量的数据集。 在本课中，我们加载了加利福尼亚州23个地震数据集attenu。 
+    加速度是根据两个预测因子，距离和大小(distance and magnitude)来估计的。
+
+- Class: cmd_question
+  Output: 根据数据生成回归线。 在R提示符处输入efit <- lm（accel~mag + dist，attenu）。 
+  CorrectAnswer: efit <- lm(accel ~ mag+dist, attenu)
+  AnswerTests: creates_lm_model('efit <- lm(accel ~ mag+dist, attenu)')
+  Hint: 在R提示符处输入efit <- lm（accel~mag + dist，attenu）。
+
+- Class: cmd_question
+  Output: 验证残差的平均值是0。 
+  CorrectAnswer: mean(efit$residuals)
+  AnswerTests: omnitest(correctExpr='mean(efit$residuals)')
+  Hint: 在R提示符处输入mean（efit$residuals）。
+
+- Class: cmd_question
+  Output: 使用R函数cov验证残差与幅度预测器（attenu$mag）不相关
+  CorrectAnswer: cov(efit$residuals, attenu$mag)
+  AnswerTests: ANY_of_exprs('cov(efit$residuals, attenu$mag)','cov(attenu$mag,efit$residuals)')
+  Hint: 在R提示符下输入cov（efit $ residuals，attenu $ mag）。
+
+- Class: cmd_question
+  Output: 使用R函数cov验证残差与距离预测器(attenu$dist)不相关。
+  CorrectAnswer: cov(efit$residuals, attenu$dist)
+  AnswerTests: ANY_of_exprs('cov(efit$residuals, attenu$dist)','cov(attenu$dist,efit$residuals)')
+  Hint: 在R提示符下输入cov（efit$residuals，attenu$dist）。
+  
+- Class: mult_question
+  Output: 确定将这次练习的结果提交吗?
+  CorrectAnswer: NULL
+  AnswerChoices: Yes;No
+  AnswerTests: post_on_demand()
+  Hint: ""
+  
+- Class: text
+  Output: 恭喜！ 你已经完成了关于残差的课程。

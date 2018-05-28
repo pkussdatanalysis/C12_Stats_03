@@ -1,0 +1,226 @@
+- Class: meta
+  Course: Regression_Models
+  Lesson: Residuals_Diagnostics_and_Variation
+  Author: mzl
+  Type: Standard
+  Organization: pkuss
+  Version: 2.4.3
+  
+- Class: text
+  Output: Residuals(残差), Diagnostics(诊断), and Variation(方差)，这三个词是我们本节的主题。
+  
+- Class: figure
+  Output: 在附图中有一个相当明显的异常值，虽然很明显，通过比较橙色线和黑色线可以看出来，异常值没有对拟合造成很大的影响，
+    橙色线表示一个包括异常值的拟合，黑线表示排除异常值的拟合，包括这个异常值并不会改变拟合很多，所以说是没有影响力
+  Figure: noninfluential.R
+  FigureType: new
+
+- Class: figure
+  Output: 下一个图例也有一个相当明显的异常值，但是在这种情况下，包括异常值在内的变化很大，橙线的斜率和残差与黑线的斜率和残差有很大的不同。
+    这个异常值就是有影响力
+  Figure: influential.R
+  FigureType: new
+
+- Class: text
+  Output: 异常值可能属于数据，也可能不属于数据，它们可能代表真实事件，也可能是虚假事件，无论如何，都应该进行检查，为了发现它们，
+    R提供了各种诊断图和影响度量。这一课我们将说明它们的含义和用法，基本的技巧是检查一个样本的效果，
+    就像我们在比较上面的黑色和橙色线时所做的一样，我们将使用有影响力的异常值来说明，有明确的效果
+
+- Class: cmd_question
+  Output: 具有影响力的异常值在名为out2的数据框中，它有两列，分别标记为y和x。首先，使用fit <- lm（y~x，out2）
+    或等价表达式创建一个名为fit的模型
+  CorrectAnswer: fit <- lm(y ~ x, out2)
+  AnswerTests: creates_lm_model('fit <- lm(y ~ x, out2)')
+  Hint: 在R提示符处输入fit <- lm（y~x，out2）或等价表达式
+
+- Class: cmd_question
+  Output: 最简单的诊断图显示残差与拟合值，残差应与预测值不相关，独立和（几乎）同分布均值为零。在R提示符下输入plot（fit，which = 1），
+    看看是否是这种情况。
+  CorrectAnswer: plot(fit, which=1)
+  AnswerTests: omnitest(correctExpr='plot(fit, which=1)')
+  Hint: 在R提示符下输入plot（fit，which = 1）
+  Figure: restore_1.R
+  FigureType: new
+
+- Class: mult_question  
+  Output: 残差是否与fit不相关
+  AnswerChoices: Yes;No. There is a linear pattern involving all but one residual and the fit.
+  CorrectAnswer: No. There is a linear pattern involving all but one residual and the fit.
+  AnswerTests: omnitest(correctVal= 'No. There is a linear pattern involving all but one residual and the fit.')
+  Hint: 残差是否与fit不相关
+
+- Class: mult_question  
+  Output: 残差vs拟合曲线标出某些点的行号或数字，在我们的例子中是数字，你猜这三个标记点中哪一个是我们有影响的离群点？
+  AnswerChoices: 1;13;50
+  CorrectAnswer: 1
+  AnswerTests: omnitest(correctVal= '1')
+  Hint: 这是非常明显的，例如，它远离了其他点
+
+- Class: cmd_question
+  Output: 我们有影响力的异常值在数据的第一行，排除它仅仅是使用out2 [-1]而不是out2作为数据。创建第二个模型，
+    命名为fitno('fit with no outlier'),它排除了异常值
+  CorrectAnswer: fitno <- lm(y ~ x, out2[-1, ])
+  AnswerTests: creates_lm_model('fitno <- lm(y ~ x, out2[-1,])')
+  Hint: 在R提示符处输入fitno <- lm（y~x，out2 [-1，]）或等价表达式
+
+- Class: cmd_question
+  Output: 为fitno显示残差与拟合图，记住使用which= 1
+  CorrectAnswer: plot(fitno, which=1)
+  AnswerTests: omnitest('plot(fitno, which=1)')
+  Hint: 为fitno显示残差与拟合图，记住使用which= 1
+  Figure: restore_2.R
+  FigureType: new
+
+- Class: text
+  Output: 这个图形没有第一个模式的外观，如果残差是独立的（几乎）同分布、零均值，并且与拟合的模型不相关，那么看起来就像我们所期望的那样
+
+- Class: cmd_question
+  Output: 样本中包含或排除异常点导致的系数变化是异常值影响力一个简单度量。从coef（fit）中减去coef（fitno）以查看包含有影响的第一个样本引起的变化
+  CorrectAnswer: coef(fit)-coef(fitno)
+  AnswerTests: ANY_of_exprs('coef(fit)-coef(fitno)', 'fit$coef-fitno$coef', 'fit$coefficients-fitno$coefficients')
+  Hint: 只需在R提示符处输入coef（fit）-coef（fitno）即可。
+
+- Class: cmd_question
+  Output: dfbeta：函数dfbeta对数据中的每个样本进行等价计算，dfbeta（fit）的第一行应该与我们刚刚计算的差值相匹配，
+    第二行是第二个样本的类似计算等等，因为dfbeta返回一个大的矩阵，可以使用head（dfbeta（fit））或View（dfbeta（fit））来检查结果。
+  CorrectAnswer: head(dfbeta(fit))
+  AnswerTests: ANY_of_exprs('head(dfbeta(fit))', 'View(dfbeta(fit))')
+  Hint: 在R提示符处输入head（dfbeta（fit））或View（dfbeta（fit））
+
+- Class: text
+  Output: 比较第一行和下面的行，我们看到第一个样本对斜率（x列）的影响比其他样本大得多，实际上它的影响幅度大约是任何样本的100倍，另一点，
+    它对截距的影响本质上不是很明显，因为它的y坐标是0，是其他样本的平均值。
+
+- Class: figure
+  Output: 当一个样本包含在模型中时，与排除它的模型（黑线）相比，它将回归线拉近自身（橙线）。它的残差，
+    它的实际y值与回归线上的值的距离，在包含的时候（橙色点）的大小小于省略的时候（黑色点）的大小。因此，对于一个有影响的样本来说，
+    这两个残差的比（橙色线上的残差/黑色线上的残差）的幅度是小的。影响小的节点的这个比例的样本将接近于1.因此，1减去这个比值是一个影响的度量，对于没有影响的点接近0，
+    对于有影响力的点接近1
+  Figure: hatvalues.R
+  FigureType: new
+
+- Class: cmd_question
+  Output: 这个度量有时被称为影响力，有时是杠杆作用，有时候是帽子值，因为它是1减去两个残差的比率，所以从头开始计算，
+    我们必须首先得到两个残差，比率的分子（橙色圆点）是我们称之为fit的模型的第一个样本的残差。fitno模型排除这个样本也排除了它的残差，
+    所以我们必须计算它的值，这很容易完成，我们用R的预测函数predict来计算fitno的预测y的值并从实际值中减去，
+    使用表达式resno <- out2 [1，“y”] - predict（fitno，out2 [1，]）来进行计算。
+  CorrectAnswer: resno <- out2[1, "y"] - predict(fitno, out2[1,])
+  AnswerTests: ANY_of_exprs('resno <- out2[1, "y"] - predict(fitno, out2[1,])', "resno <- out2[1, 'y'] - predict(fitno, out2[1,])")
+  Hint: 在R提示符处输入表达式resno <- out2 [1，“y”] - predict（fitno，out2 [1，]）。
+
+- Class: cmd_question
+  Output: 现在使用1-resid（fit）[1] / resno或等效表达式来计算我们的异常值的影响
+  CorrectAnswer: 1-resid(fit)[1]/resno
+  AnswerTests: calculates_same_value('1-resid(fit)[1]/resno')
+  Hint: 在R提示符处输入1-resid（fit）[1] / resno或等效表达式。
+
+- Class: cmd_question
+  Output: hatvalues：函数，hatvalues，对每个样本执行相当于刚刚完成的计算，因此hatvalues(fit)的第一项应该与你刚才计算的值相匹配。
+    少数样本，使用head（hatvalues(fit)））或View（hatvalues(fit)）来比较我们的离群值与其他样本的影响度量。
+  CorrectAnswer: head(hatvalues(fit))
+  AnswerTests: ANY_of_exprs("head(hatvalues(fit))", "View(hatvalues(fit))")
+  Hint: 在R提示符下输入head（hatvalues（fit））或View（hatvalues（fit））。
+
+- Class: text
+  Output: 单个样本的残差有时候会被视为具有相同的方差，这被估计为整个残差集合的样本方差，然而，从理论上讲，单个样本的残差有不同的方差，
+    当有离群的异常点出现的时候，这些差异会变大。标准化和学生化残差试图用两种稍微不同的方式来补偿这种影响，两者都使用帽子值(hat values)。
+
+- Class: cmd_question
+  Output: 我们先考虑标准化残差，首先计算fit残差的样本标准差，用fit的偏差即残差平方和除以残差自由度，取平方根，将结果存储起来在一个叫sigma的变量中。
+  CorrectAnswer: sigma <- sqrt(deviance(fit)/df.residual(fit))
+  AnswerTests: calculates_same_value('sigma <- sqrt(deviance(fit)/df.residual(fit))');expr_creates_var('sigma')
+  Hint: 在R提示符处输入sigma <- sqrt(deviance(fit)/df.residual(fit))或等价的表达式。
+
+- Class: cmd_question
+  Output: 通常我们只用sigma来除fit残差（其平均值为0），在本例中我们用sigma倍的sqrt（1-hatvalues（fit））来估计单个样本的标准偏差。 
+    因此我们不是用resid(fit)除以sigma,而是我们除以sigma* sqrt(1-hatvalues(fit))，结果称为标准化残差，计算fit的标准化残差并存储在一个名为rstd的变量中。
+  CorrectAnswer: rstd <- resid(fit)/(sigma * sqrt(1-hatvalues(fit)))
+  AnswerTests: calculates_same_value('rstd <- resid(fit)/(sigma * sqrt(1-hatvalues(fit)))');expr_creates_var('rstd')
+  Hint: 在R提示符处输入rstd <- resid（fit）/（sigma * sqrt（1-hatvalues（fit）））或等效表达式
+
+- Class: cmd_question
+  Output: rstandard：函数rstandard，计算我们刚刚计算出的标准化残差，用head（cbind（rstd，rstandard（fit）））或者
+    View（cbind（rstd，rstandard（fit）））比较两个计算
+  CorrectAnswer: head(cbind(rstd, rstandard(fit)))
+  AnswerTests: ANY_of_exprs('head(cbind(rstd, rstandard(fit)))', 'View(cbind(rstd, rstandard(fit)))')
+  Hint: 在R提示符处输入head（cbind（rstd，rstandard（fit）））或View（cbind（rstd，rstandard（fit）））。
+
+- Class: cmd_question
+  Output: 比例 - 位置图显示对拟合值的标准化残差的平方根，使用plot（fit,which= 3）来显示它。
+  CorrectAnswer: plot(fit, which=3)
+  AnswerTests: omnitest(correctExpr='plot(fit, which=3)')
+  Hint: 在R提示符下输入plot（fit，which = 3）。
+  Figure: restore_3.R
+  FigureType: new
+
+- Class: cmd_question
+  Output: 大多数讨论中的诊断统计是由于其他诊断方法的缺陷而产生的，因为它们在零假设下的分布可以被表征，
+    残差近似正态的假设在这种表征中是隐含的。由于标准化残差对单个残差方差的调整，一个标准化的残差与标准化的残差对常态方差的QQ曲线是有意义的，
+    使用plot（fit，which = 2）来显示这个诊断曲线。
+  CorrectAnswer: plot(fit, which=3)
+  AnswerTests: omnitest(correctExpr='plot(fit, which=2)')
+  Hint: 在R提示符下输入plot（fit，which = 2）。
+  Figure: restore_4.R
+  FigureType: new
+
+- Class: mult_question  
+  Output: 看看异常值的标准化残差，在正常QQ图上标记为1，关于这个异常值得标准偏差？
+  AnswerChoices: About -5;About -2
+  CorrectAnswer: About -5
+  AnswerTests: omnitest(correctVal= 'About -5')
+  Hint: 这将是它在垂直轴上的位置
+  
+- Class: cmd_question
+  Output: 学生化残差（有时称为外部学生化残差）除了个别的帽子值之外，还使用模型的偏差来估计个体残差的标准偏差，我们将用异常值来说明。
+    回顾一下，我们所谓的fitno模型省略了离群点样本，通过除去残差的自由度并取平方根来计算fitno残差的样本标准偏差，
+    将结果存储在名为sigma1的变量中。
+  CorrectAnswer: sigma1 <- sqrt(deviance(fitno)/df.residual(fitno))
+  AnswerTests: calculates_same_value('sigma1 <- sqrt(deviance(fitno)/df.residual(fitno))');expr_creates_var('sigma1')
+  Hint: 在R提示符下输入sigma1 < - sqrt（偏差（fitno）/df.residual（fitno））或等效表达式。
+
+- Class: cmd_question
+  Output: 用resid(fit)[1]除以sigma1和sqrt（1-hatvalues（fit）[1]）的乘积来计算离群值样本的学生化残差。不需要将其存储在变量中。
+  CorrectAnswer: resid(fit)[1]/(sigma1*sqrt(1-hatvalues(fit)[1]))
+  AnswerTests: calculates_same_value('resid(fit)[1]/(sigma1*sqrt(1-hatvalues(fit)[1]))')
+  Hint: 在R提示符处输入resid（fit）[1] /（sigma1 * sqrt（1-hatvalues（fit）[1]））或等效表达式
+
+- Class: cmd_question
+  Output: rstudent：函数rstudent使用等价于我们刚刚用于异常点的过程来计算每个样本的学生化残差，因此rstudent（fit）[1]
+    应该与我们在前一个问题中计算的值相匹配。head（rstudent（fit））或View（rstudent（fit））来验证这一点，
+    并将异常值的学生化残差与其他样本的残差进行比较
+  CorrectAnswer: head(rstudent(fit))
+  AnswerTests: ANY_of_exprs('head(rstudent(fit))', 'View(rstudent(fit))', 'rstudent(fit)')
+  Hint: 在R提示符处输入head（rstudent（fit））或等效表达式。
+
+- Class: text
+  Output: 库克距离是我们要考虑的最后一个影响度量，它基本上是拟合值和没有特定样本的值下的拟合值之间的差的平方和，
+    通过除以残差样本方差乘以预测因子的数量在我们的例子中是2（截距和x）它被归一化，它基本上告诉给定的样本能多大程度上改变一个模型，
+    我们将再次通过计算Cook的离群距离来进行说明
+
+- Class: cmd_question
+  Output: 我们将首先计算fit和fitno之间预测值的差异，分别包含和省略异常值的模型，通过从predict（fitno，out2）中减去predict（fit，out2）
+    最容易完成。将差异存储在名为dy的变量中。
+  CorrectAnswer: dy <- predict(fitno, out2)-predict(fit, out2)
+  AnswerTests: calculates_ANY_value('dy <- predict(fitno, out2)-predict(fit, out2)', 'dy <- predict(fit, out2)-predict(fitno, out2)');expr_creates_var('dy')
+  Hint: 在R提示符处输入dy < - predict（fitno，out2）-predict（fit，out2）或等效表达式。
+
+- Class: cmd_question
+  Output: 回想一下，我们先计算拟合残差的样本标准偏差，sigma,然后将dy的平方和除以2 * sigma ^ 2来计算离群点的Cook距离，
+    不需要将结果存储在一个变量中。
+  CorrectAnswer: sum(dy^2)/(2*sigma^2)
+  AnswerTests: calculates_same_value('sum(dy^2)/(2*sigma^2)')
+  Hint: 在R提示符处输入sum（dy ^ 2）/（2 * sigma ^ 2）或等效表达式。
+
+- Class: cmd_question
+  Output: cooks.distance：函数cooks.distance将计算每个样本的Cook距离，而不是验证cooks.distance（fit）[1]等于刚刚计算的值，
+    因为这样的事情必须是现在变得乏味，显示一个诊断图，使用库克的距离使用plot（fit，which= 5）。
+  CorrectAnswer: plot(fit, which=5)
+  AnswerTests: omnitest(correctExpr='plot(fit, which=5)')
+  Hint: 在R提示符下输入plot（fit，which = 5）
+  
+- Class: mult_question
+  Output: 确定将这次练习的结果提交吗?
+  CorrectAnswer: NULL
+  AnswerChoices: Yes;No
+  AnswerTests: post_on_demand()
+  Hint: ""

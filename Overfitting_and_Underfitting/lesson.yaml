@@ -1,0 +1,182 @@
+- Class: meta
+  Course: Regression_Models
+  Lesson: Overfitting_and_Underfitting
+  Author: mzl
+  Type: Standard
+  Organization: pkuss
+  Version: 2.4.3
+
+- Class: text
+  Output: 方差膨胀因子课程表明，包含新变量会增加其他相关回归因子的系数估计值的标准误差，因此，我们不希望将变量加到到模型中，另一方面，
+    忽略变量将导致与它相关的回归因子的系数估计有偏差。本节课中，我们探究省略变量的影响并讨论使用ANOVA来构建简洁，可解释的数据表示
+
+- Class: text
+  Output: 首先，我想说明省略一个相关的回归因子如何对一个系数的估计值造成偏差，相关的源代码是在一个名为fitting.R的文件中，
+    我已经将其拷贝到您的工作目录中，并尝试在您的代码编辑器中显示。如果我没有显示它，你应该手动打开它
+
+- Class: mult_question  
+  Output: 在fitting.R的顶部找到函数simbias（）。在标记为Point A的注释下面定义三个回归因子x1，x2和x3，哪两个回归因子是相关的？
+  AnswerChoices: "x1 and x2;x1 and x3;x2 and x3"
+  CorrectAnswer: "x1 and x2"
+  AnswerTests: omnitest(correctVal= 'x1 and x2')
+  Hint: 变量temp参与形成x1和x2。
+
+- Class: mult_question  
+  Output: 在simbias（）内定义另一个函数f（n），它形成一个因变量y，在C点返回两个模型(y ~ x1 + x2和y ~ x1 + x3)x1的估计系数。每个模型中都缺少一个回归因子，
+    在y（点B处）的表达式中，x1的实际系数是多少？
+  AnswerChoices: 1;0.3;1/sqrt(2)
+  CorrectAnswer: 1
+  AnswerTests: omnitest(correctVal= '1')
+  Hint: 总和x1 + x2 + x3中，x1的系数是多少？
+
+- Class: cmd_question
+  Output: 在simbias（）中的D点，内部函数f（）被应用150次，结果返回为2x150矩阵。矩阵的第一行包含了当与x1不相关的x3被忽略时x1系数的独立估计，
+    第二行包含相关回归因子x2省略时x1系数的估计，使用接受默认参数的simbias（）来形成这些估计并将结果存储在一个名为x1c的变量中。 
+    （默认的参数只是保证了一个接下来图中的一个很好的直方图）
+  CorrectAnswer: "x1c <- simbias()"
+  AnswerTests: omnitest(correctExpr='x1c <- simbias()')
+  Hint: 只需在R提示符处输入x1c <- simbias（）。
+
+- Class: cmd_question
+  Output: x1的实际系数为1.已经警告忽略相关回归因子会偏差x1系数的估计值，我们预计x1c第二行的平均估计值与x1c第一行的平均值差距较大。
+    apply(x1c, 1, mean)，找出每一行均值。
+  CorrectAnswer: apply(x1c, 1, mean)
+  AnswerTests: omnitest(correctExpr='apply(x1c, 1, mean)')
+  Hint: 在R提示符处输入apply（x1c，1，mean）。
+
+- Class: figure
+  Output: 显示x1c的第一行（蓝色）和第二行（红色）的估计值的直方图，第二行的估计值明显比正确的值1多两个标准差，
+    由于省略了相关回归因子导致的偏差也很明显（产生这个图形的代码是附带的，位于fitting.R的底部函数x1hist（）可以作为参考）
+  Figure: histograms.R
+  FigureType: new
+
+- Class: figure
+  Output: 添加不相关的回归因子可以使模型趋向于完美契合，我们通过向Swiss数据中添加随机回归因子并逐渐回归来说明这一点，
+    随着回归因子的数量接近数据点的数量（47 ），残差的平方和（也被称为偏差deviance）接近于0.（这个图的源代码是fitting.R的函数bogus（）
+  Figure: bogus.R
+  FigureType: new
+
+- Class: text
+  Output: 在图中，加入随机回归因子减少了偏差，但我们误会认为这样的降低是显著的，为了评估显着性，我们应该考虑到加入回归因子减少了
+    残差自由度。方差分析（ANOVA）是量化额外回归因子重要性的一种有用的方法，为了举例说明，我们将使用Swiss数据。
+
+- Class: cmd_question
+  Output: 回想一下，瑞士的数据集包括1888年瑞士47个法语省份的标准化生育指标和社会经济指标。Fertility(生育率)被认为取决于截距和五个因素：
+    Agriculture, Examination, Education, Catholic和 Infant Mortality。开始我们的方差分析的例子，回归Fertility关于Agriculture的模型，并将结果存储在一个名为fit1的变量中
+  CorrectAnswer: fit1 <- lm(Fertility ~ Agriculture, swiss)
+  AnswerTests: creates_lm_model('fit1 <- lm(Fertility ~ Agriculture, swiss)')
+  Hint: 在R提示符下输入fit1 <- lm(Fertility ~ Agriculture, swiss)
+
+- Class: cmd_question
+  Output: 通过回归Fertility和两个额外的回归因子，Examination,和Education，创建另一个名为fit3的模型。
+  CorrectAnswer: fit3 <- lm(Fertility ~ Agriculture + Examination + Education, swiss)
+  AnswerTests: creates_lm_model('fit3 <- lm(Fertility ~ Agriculture + Examination + Education, swiss)')
+  Hint: 在R提示符下输入fit3 <- lm(Fertility ~ Agriculture + Examination + Education, swiss)
+
+- Class: cmd_question
+  Output: 我们现在将使用anova来评估两个额外回归因子的显著性，原假设是加入的回归不显著，我们将在稍后详细解释，但现在只需要输入anova （fit1，fit3）
+  CorrectAnswer: anova(fit1, fit3)
+  AnswerTests: omnitest(correctExpr='anova(fit1, fit3)')
+  Hint: 在R提示符处输入anova（fit1，fit3）
+
+- Class: mult_question  
+  Output: 在打印的表格右下方的三个星号***表示零假设在0.001水平被拒绝，所以两个附加回归因子中的至少一个是显著的。拒绝是基于右边的，
+    F检验，Pr（> F），应用于F值，根据表格，F值是多少
+  AnswerChoices: 20.968;3102.2;45
+  CorrectAnswer: 20.968
+  AnswerTests: omnitest(correctVal= '20.968')
+  Hint: 输出的表格里中标有F的列中唯一的数字
+
+- Class: mult_question
+  Output: F统计量是两个平方和除以它们各自的自由度的比值，如果这两个和是独立的并且具有相同方差的中心卡方分布，
+    则统计量将具有给定参数的F分布。在我们的例子中，这两个和是残差的平方和，正如我们所知，平均值为零，因此是中心卡方
+    并且残差本身是正态分布的。 表格里RSS（残差平方和）列，它们是什么？
+  AnswerChoices: 6283.1 and 3180.9;2 and 3102.2;45 and 43
+  CorrectAnswer: 6283.1 and 3180.9
+  AnswerTests: omnitest(correctVal= '6283.1 and 3180.9')
+  Hint: 这两个数字在由anova（fit1，fit3）打印的表格中的RSS标签下。
+
+- Class: cmd_question
+  Output: R的函数deviance(model)，计算线性模型的残差平方和(也称为deviance)。使用deviance（fit3），验证3180.9是fit3的残差平方和。
+    （当然，fit3在表中被称为Model 2）
+  CorrectAnswer: deviance(fit3)
+  AnswerTests: omnitest(correctExpr='deviance(fit3)')
+  Hint: 在R提示符处输入deviance(fit3)
+
+- Class: cmd_question
+  Output: 在接下来的几个步骤中，我们将展示如何计算在anova（）打印的表中出现的F值20.968，我们将从分母开始，
+    它是fit3残差的平方和除以自由度; Fit3有43个残余自由度，这个数字是从Swiss数据的样本数量47中减去fit3的预测变量（3个命名变量和1个截距）
+    的数量4得到的，存储deviance(fit3)/ 43在名为d的变量中。
+  CorrectAnswer: d <- deviance(fit3)/43
+  AnswerTests: "ANY_of_exprs('d <- deviance(fit3)/43', 'd <- deviance(fit3)/df.residual(fit3)', 'd <- deviance(fit3)/fit3$df.residual')"
+  Hint: 在R提示符处输入d <- deviance（fit3）/ 43
+
+- Class: cmd_question
+  Output: 分子是差，deviance（fit1） - deviance（fit3）除以fit1和fit3的残差自由度的差值，即2。这个计算需要一些我们省略的理论上的理由，
+    想法是fit3除了fit1之外还有两个预测指标，计算分子并将其存储在名为n的变量中
+  CorrectAnswer: n <- (deviance(fit1) - deviance(fit3))/2
+  AnswerTests: "ANY_of_exprs('n <- (deviance(fit1) - deviance(fit3))/2', 'n <- (deviance(fit1) - deviance(fit3))/(45-43)', 'n <- (deviance(fit1) - deviance(fit3))/(df.residual(fit1)-df.residual(fit3))', 'n <- (deviance(fit1) - deviance(fit3))/(fit1$df.residual - fit3$df.residual)')"
+  Hint: 在R提示符处输n <- (deviance(fit1) - deviance(fit3))/2
+
+- Class: cmd_question
+  Output: 计算比率n / d，以显示它本质上等于由anova（）给出的F值20.968
+  CorrectAnswer: n/d
+  AnswerTests: omnitest(correctExpr='n/d')
+  Hint: 只需在R提示符处输入n / d。
+
+- Class: cmd_question
+  Output: 现在我们将计算p值，这是从具有参数2和43的F分布中得出n / d或更大的值的概率。在由anova（）打印的表格中标记为Pr（> F）的列，该值是4.407e-07，
+    是非常不可能的值，如果零假设为真，则使用pf（n / d，2，43，lower.tail = FALSE）计算该p值
+  CorrectAnswer: pf(n/d, 2, 43, lower.tail=FALSE)
+  AnswerTests: omnitest(correctExpr='pf(n/d, 2, 43, lower.tail=FALSE)')
+  Hint: 在R提示符处输入pf（n / d，2，43，lower.tail = FALSE）。
+
+- Class: cmd_question
+  Output: 基于计算出的p值，原假设的是不太可能的，我们确信fit3明显优于fit1，但有一点需要注意：方差分析对假设模型残差是近似正态的很敏感。
+    如果不是这样的话，那么我们可以得到一个很小的p值，因此值得检验正态分布的残差，Shapiro-Wilk检验在R中是快速而简单的，
+    正态性是零假设，使用shapiro.test(fit3$residuals)来测试fit3的残差。
+  CorrectAnswer: shapiro.test(fit3$residuals)
+  AnswerTests: ANY_of_exprs('shapiro.test(fit3$residuals)', 'shapiro.test(residuals(fit3))')
+  Hint: 在R提示符处输入shapiro.test（fit3 $ residuals）
+
+- Class: cmd_question
+  Output: Shapiro-Wilk p值0.336不能拒绝正态性，这支持了我们对方差分析的信心。为了说明在两个以上因子的模型中使用anova（），
+    我构建了fit5和fit6，分别包含5个和所有6个回归因子（包括截距），因此fit1，fit3，fit5和fit6形成一个嵌套的模型序列，
+    其中一个的回归因子包含在下一个回归因子中。 在R提示符处输入anova（fit1，fit3，fit5，fit6）
+  CorrectAnswer: anova(fit1, fit3, fit5, fit6)
+  AnswerTests: omnitest(correctExpr='anova(fit1, fit3, fit5, fit6)')
+  Hint: 在R提示符处输入anova（fit1，fit3，fit5，fit6）
+
+- Class: text
+  Output: 看来，每个模型都是其前身的一个重大改进，在结束这一课之前，让我们回顾一下几个要点。
+
+- Class: mult_question  
+  Output: 省略回归因子可以使估计某些其他回归因子的系数出现偏差，哪些？
+  AnswerChoices: Correlated regressors;Uncorrelated regressors
+  CorrectAnswer: Correlated regressors
+  AnswerTests: omnitest(correctVal= 'Correlated regressors')
+  Hint: 另一个
+
+- Class: mult_question  
+  Output: 包含更多的回归因子会减少模型的残差平方和，即使新的回归因子不相关，是对还是错？
+  AnswerChoices: True;False;It depends on circumstances.
+  CorrectAnswer: True
+  AnswerTests: omnitest(correctVal= 'True')
+  Hint: 这不取决于情况
+
+- Class: mult_question  
+  Output: 当添加回归因子时，残差平方和的减少的显著性应该被测试并且大于残差自由度减少的重要性，R的anova（）函数使用F检验来达到这个目的。为了确保anova（）适用应该怎么做？
+  AnswerChoices: "Model residuals should be tested for normality.;Regressors should be tested for normality.;The residuals should be tested for having zero means."
+  CorrectAnswer: Model residuals should be tested for normality.
+  AnswerTests: omnitest(correctVal= 'Model residuals should be tested for normality.')
+  Hint: F检验对正态性假设很敏感。
+  
+- Class: mult_question
+  Output: 确定将这次练习的结果提交吗?
+  CorrectAnswer: NULL
+  AnswerChoices: Yes;No
+  AnswerTests: post_on_demand()
+  Hint: ""
+  
+- Class: text
+  Output: 这就完成了关于Overfitting和Underfitting的训练

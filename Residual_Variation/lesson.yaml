@@ -1,0 +1,118 @@
+- Class: meta
+  Course: Regression_Models
+  Lesson: Residual_Variation
+  Author: mzl
+  Type: Standard
+  Organization: pkuss
+  Version: 2.4.3
+
+- Class: text
+  Output: 残差可用于指示数据点与统计模型的吻合程度。它们可以被看作减去预测变量（X）的线性关联的结果（Y）。
+    将残差（去除预测变量后的变化）与系统误差（由回归模型解释的变化）区分开来。
+
+- Class: text
+  Output: 也可以表明，在给定模型的情况下，随机误差方差的最大似然估计是残差平方的平均值。然而，由于我们的带有一个预测器的线性模型需要两个参数，
+    我们只有（n-2）个自由度。因此，要计算“平均”残差平方来估计方差，我们使用公式1 /（n-2）*（平方残差之和）。如果我们将残差的平方和除以n而不是n-2，
+    否则结果会给出有偏差的估计。
+
+- Class: cmd_question
+  Output: 看一个这个问题的例子，我们将使用前边课程使用过的的galton身高数据。首先重新生成回归线并赋给变量fit。使用R函数lm，回想一下，
+    默认情况下，它的第一个参数是一个公式，这里是“child~parent”，其次是数据集，在这个例子中是galton。
+  CorrectAnswer: fit <- lm(child ~ parent, galton)
+  AnswerTests: omnitest(correctExpr='fit <- lm(child ~ parent, galton)')
+  Hint: 在R提示符处输入“fit < - lm（child〜parent，galton）”。
+
+- Class: text
+  Output: 首先，我们将使用我们模型的残差（fit$residuals）来估计误差的标准偏差（sigma）。我们已经定义n为Galton数据集中的点数（928）。
+
+- Class: cmd_question
+  Output:  计算残差的平方和除以数量（n-2）,然后取平方根。
+  CorrectAnswer: sqrt(sum(fit$residuals^2) / (n - 2))
+  AnswerTests: omnitest(correctExpr='sqrt(sum(fit$residuals^2) / (n - 2))')
+  Hint: 在R提示符下输入“sqrt（sum（fit $ residuals ^ 2）/（n - 2））”。
+
+
+- Class: cmd_question
+  Output: 现在看一下fit摘要的“sigma”部分，"summary(fit)$sigma" 
+  CorrectAnswer: summary(fit)$sigma 
+  AnswerTests: omnitest(correctExpr='summary(fit)$sigma')
+  Hint: 在R提示符处输入“summary（fit）$ sigma”。
+
+- Class: cmd_question
+  Output: 在R提示符处，取“deviance(fit)/(n-2)”的sqrt(平方根)。
+  CorrectAnswer: sqrt(deviance(fit)/(n-2))
+  AnswerTests: omnitest(correctExpr='sqrt(deviance(fit)/(n-2))')
+  Hint: 在R提示符处键入“sqrt（deviance（fit）/（n-2））”。
+
+- Class: text
+  Output: 另一个有用的事实是，Total Variation(总方差)= Residual Variation(残差方差)+ Regression Variation(回归方差)
+
+- Class: mult_question
+  Output: Yi_hat是回归模型的估计值(他们在回归线上),上边带一条横杠的Y是数据的平均值。下列哪个差平方的总和表示总方差？
+  AnswerChoices: Yi-mean(Yi); Yi-Yi_hat; Yi_hat-mean(Yi)
+  CorrectAnswer: Yi-mean(Yi)
+  AnswerTests: omnitest(correctVal='Yi-mean(Yi)')
+  Hint: 选择与估计或预测值无关的选项。
+  
+- Class: mult_question
+  Output: 哪个差的平方和表示残差方差？
+  AnswerChoices:  Yi-Yi_hat; Yi-mean(Yi); Yi_hat-mean(Yi)
+  CorrectAnswer: Yi-Yi_hat
+  AnswerTests: omnitest(correctVal='Yi-Yi_hat')
+  Hint: 残差表示实际值与估计（帽子）值之间的垂直距离。
+
+- Class: text
+  Output: R ^ 2表示模型（即回归变量）描述的总方差的百分比。另外，由于它是一个百分比，我们需要一个比例或平方和的一小部分。
+    现在用我们的galton数据我们来做这个。
+
+- Class: cmd_question
+  Output: 我们将从简单的步骤开始。计算儿童身高的平均值，并将其存储在一个名为mu的变量中。回想一下，我们用'galton$child'这个表达来表达孩子的身高，
+    用'galton$parent'这个表达来表示父母的身高。
+  CorrectAnswer: mu <- mean(galton$child) 
+  AnswerTests: omnitest(correctExpr='mu <- mean(galton$child)')
+  Hint: 在R提示符处输入“mu < - mean（galton$child）”。
+
+- Class: cmd_question
+  Output: 居中数据意味着从每个数据点中减去均值。现在计算居中儿童身高的平方和，并将结果存储在一个名为sTot的变量中。
+    这代表了数据的总体变化。
+  CorrectAnswer: sTot <- sum((galton$child-mu)^2)
+  AnswerTests: ANY_of_exprs('sTot <- sum((galton$child-mu)^2)','sTot <- sum((galton$child-mu)*(galton$child-mu))')
+  Hint: 在R提示符处输入“sTot <- sum（（galton $ child-mu）^ 2）”。
+
+- Class: cmd_question
+  Output: 现在创建变量sRes。使用R函数deviance来计算残差的平方和。这些是儿童高度和回归线之间的距离。这代表了残差。
+  CorrectAnswer: sRes <- deviance(fit)
+  AnswerTests: omnitest(correctExpr='sRes <- deviance(fit)')
+  Hint: 在R提示符处输入sRes <- deviance(fit)。
+
+- Class: cmd_question
+  Output: 最后，比率sRes/sTot表示由残差贡献的总方差的百分比。为了找到由模型贡献的百分比，即回归变化，从1减去分数sRes / sTot。这是值R ^ 2。
+  CorrectAnswer: 1-sRes/sTot
+  AnswerTests: omnitest(correctExpr='1-sRes/sTot')
+  Hint: 在R提示符处输入“1-sRes/sTot”。
+
+- Class: cmd_question
+  Output: 您可以将结果与summary(fit)中显示的r.squared值进行比较，以查看它是否相似。
+  CorrectAnswer: summary(fit)$r.squared
+  AnswerTests: omnitest(correctExpr='summary(fit)$r.squared')
+  Hint: 在R提示符下输入“summary（fit）$ r.squared”。
+
+- Class: cmd_question
+  Output: 为了看到一些真正的魔法，计算galton数据孩子和父母身高的相关性的平方。使用R函数cor。
+  CorrectAnswer: cor(galton$parent,galton$child)^2
+  AnswerTests: ANY_of_exprs('cor(galton$parent,galton$child)^2','cor(galton$child,galton$parent)^2')
+  Hint: 在R提示符处输入“cor（galton $ parent，galton $ child）^ 2”。
+
+
+- Class: text
+  Output: 我们现在总结一下关于R ^ 2的有用事实。这是由回归模型解释的方差的百分比。百分比在0和1之间。它也等于样本相关系数平方。然而，R ^ 2并不能说明整个故事。
+  
+- Class: mult_question
+  Output: 确定将这次练习的结果提交吗?
+  CorrectAnswer: NULL
+  AnswerChoices: Yes;No
+  AnswerTests: post_on_demand()
+  Hint: ""
+  
+- Class: text
+  Output: 祝贺！你已经完成了关于残差方差的学习。
